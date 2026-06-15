@@ -1,0 +1,266 @@
+
+clear all
+%% This code is for generating an array of latency tpeaks for events channel
+
+%% Load files for subject number ID ss
+
+all = [2 4 6 8 10 12 14	16 17 18 19 20 22 23 24	27 28 29 31 32 35 36 38 40 42 44 45 46 47 51 52 53 54 55 56 57 58 59 61 63 64 65 67 68 69 70];
+bipolar = [17 18 19 20 27 35 36 40 42 44 46 51 52 56 57 59 64 69 70];
+
+
+addpath('E:\MEG_Data_PhD\');
+addpath('C:\Users\MSI\Documents\MATLAB\fieldtrip-20240603/')
+ft_defaults
+
+for n = all
+    %@Test in this one
+    subjname = ['zhanx_', num2str(n)];
+
+    fpath =['E:\MEG_Data_PhD\', subjname, '\'];
+    fpath0 = fpath;
+
+    block = '_b1';
+
+
+    cd(fpath)
+    fif_filename = strcat(subjname, block, '_tsss_mc_trans.fif');
+
+
+    load(['tpeaks_', subjname, '_b1.mat'])
+    tpeaks_1 = tpeaks;
+    load(['tpeaks_', subjname, '_b2.mat'])
+    tpeaks_2 = tpeaks;
+
+
+    header = ft_read_header(fif_filename);
+    channel = find(strcmp(header.label, 'STI101'));
+    event = ft_read_event(fif_filename, 'chanindx', channel);   % stimulus channel has to be entered for each participant specifically
+
+    %% All events b1: estimate ITI
+    all_events = [event.sample; event.value];
+    is = find(all_events(2,:)==110);
+
+    stimuli_times_block_1 = all_events(1,is);
+
+    % if n == 24 || n == 28
+    iti_duration_ms = diff(stimuli_times_block_1);  % in participants 24 and 28 the first number in the 'is' variable is 1, and when 'is-1' is used as an index, the index becomes 0, and an index cannot be 0
+    % else
+    %     iti_duration_ms = all_events(1,is) - all_events(1,is-1);
+    % end
+
+    % Binary feedback on reward acquisition was visible for 1900 [ ± 100] ms,
+    figure; histogram(iti_duration_ms,20); set(gca,'FontSize',20)
+
+    % assess how long ITI is after removing feedback display for max 2000ms
+    iti_duration_ms(iti_duration_ms<3000) = nan;
+    % Stim not preceeded by an outcome?
+    iti_duration_ms = iti_duration_ms - 2000;
+    figure; histogram(iti_duration_ms,20); set(gca,'FontSize',20)
+    cc = [min(iti_duration_ms), nanmedian(iti_duration_ms), max(iti_duration_ms)];
+
+    %% Stimulis b1 events
+    events_stimulus_1 = [event.sample; event.value];
+
+    % Collect indices of elements to remove
+    indices_to_remove = [];
+
+    for i = 1:length(events_stimulus_1)
+        if events_stimulus_1(2, i) ~= 110
+            indices_to_remove(end+1) = i; % from all events
+        end
+    end
+
+
+    % Remove collected indices
+    events_stimulus_1(:, indices_to_remove) = [];
+
+    events_stimulus_1 = events_stimulus_1(1, :);
+
+    vector1 = events_stimulus_1;
+    vector2 = tpeaks_1;
+
+    nearest_previous_values_1 = find_nearest_previous_values(vector1, vector2);
+    %% for the second block
+
+    block = '_b2';
+
+    fif_filename2 = strcat(subjname, block, '_tsss_mc_trans.fif');
+
+    channel = find(strcmp(header.label, 'STI101'));
+
+    event = ft_read_event(fif_filename2, 'chanindx', channel);    % change stimulus channel
+
+    %% ITI duration check
+    % all events
+    all_events = [event.sample; event.value];
+
+    if n == 22                                                 %  both blocks in zhanx_22 contain 110 as the stimulus trigger, because block_1 was recorded twice due to a technical error
+        is2 = find(all_events(2,:)==110);
+    else
+        is2 = find(all_events(2,:)==40);
+        if n == 24 
+            is2(1) = [];
+        end
+    end    
+
+
+    stimuli_times_block_2 = all_events(1,is2);
+
+    % if n == 24 || n == 28
+    iti2_duration_ms = diff(stimuli_times_block_2); 
+
+    % if n == 24 % || n == 28
+    % iti2_duration_ms = all_events(1,is2+1) - all_events(1,is2);  % in participant 24 the first number in the 'is2' variable is 1, and when 'is2-1' is used as an index, the index becomes 0, and an index cannot be 0
+    % else
+    %     iti_duration_ms = all_events(1,is2) - all_events(1,is2-1);
+    % end
+    % Binary feedback on reward acquisition was visible for 1900 [ ± 100] ms,
+    figure; histogram(iti2_duration_ms,20); set(gca,'FontSize',20)
+
+    % assess how long ITI is after removing feedback display for max 2000ms
+    % replace not-valid ITI with nan
+
+    iti2_duration_ms(iti2_duration_ms<3000) = nan;
+    % Stim not preceeded by an outcome?
+
+    iti2_duration_ms = iti2_duration_ms - 2000;
+    figure; histogram(iti2_duration_ms,20); set(gca,'FontSize',20)
+    cc2 = [min(iti2_duration_ms), nanmedian(iti2_duration_ms), max(iti2_duration_ms)];
+
+
+
+    %% Stimulus b2 events
+    events_stimulus_2 = [event.sample; event.value];
+
+    % Collect indices of elements to remove
+    indices_to_remove = [];
+
+
+    if n == 22
+        for i = 1:length(events_stimulus_2)
+            if events_stimulus_2(2, i) ~= 110    % special case where block 1 was recorded twice
+                indices_to_remove(end+1) = i;
+            end
+        end
+    else
+        for i = 1:length(events_stimulus_2)
+            if events_stimulus_2(2, i) ~= 40
+                indices_to_remove(end+1) = i;
+            end
+        end
+    end
+
+
+    % Remove collected indices
+    events_stimulus_2(:, indices_to_remove) = [];
+
+    events_stimulus_2 = events_stimulus_2(1, :);
+
+    vector1 = events_stimulus_2;
+    vector2 = tpeaks_2;
+
+    nearest_previous_values_2 = find_nearest_previous_values(vector1, vector2);
+    %%
+    % save_path = [ '/Volumes/KINGSTON/MEG_Data_PhD/', subjname, '/' ];
+    % cd(save_path)
+
+    %@ tpeaks_tokeep contains latency of Tpeaks at n-1, n-2 that preceed stimuli
+    tpeaks_tokeep = cat(2, nearest_previous_values_1, nearest_previous_values_2);
+
+    %% Check Twave peaks latency values
+    % @ latency_peaks includes LATENCY DIFFERENCE BETWEEN n-1, n-2, Tpeaks
+    % preceding stimuli & stimuli
+    load([fpath0,'latency_tpeaks.mat'])
+
+
+    % These values are all in milliseconds because Fs = 1000 Hz
+    % Check latency_peaks
+    thr1 = 400;  % we only accept T wave peaks that precede the stimulus onset by more than thr1 milliseconds
+    thr2 = 1200; % exclude trials when the T wave peak in latency_tpeaks(:,2) is more than thr2 farther apart from latency_tpeaks(:,1)
+
+    delta_lat = diff(latency_tpeaks)';
+    max(delta_lat)  % check this is not much larger than 1000, as it could mean we skipped an T peak in the detection
+    ind_exc = find(delta_lat > thr2); % for instance
+    %Twave PEAK at least 400 apart from Stimulus
+
+    latency_tpeaks = latency_tpeaks'; %
+
+    ikeep = (find(latency_tpeaks(:,1)>thr1)); % first previous value
+    ikeep2 = (find(latency_tpeaks(:,2)>thr1)); % second previous value
+    ikeep2 = setdiff(ikeep2, ind_exc); % second previous value
+
+
+
+    %@ Check histogram: Tpeak at n-1 from stimulus
+    figure;histogram(latency_tpeaks(ikeep,1),20); set(gca,'FontSize',20)
+
+    %@ Check how far apart the Tpeak at n-2 is from stimulus, we don't want
+    %this to extend back into the outcome display window, should not be longer
+    %than ITI on the trial
+    figure;histogram(latency_tpeaks(ikeep2,2),20); set(gca,'FontSize',20)
+
+    
+
+    % we append a large first value so the subsequent check always succeeds
+    % for the first t-peak pair
+    iti_duration_ms_all = cat(2, 10000, iti_duration_ms_all);
+
+    ikeep3 = find(latency_tpeaks(:,2)<=iti_duration_ms_all');
+    ikeep2 = intersect(ikeep2, ikeep3);
+    figure;histogram(latency_tpeaks(ikeep2,2),20); set(gca,'FontSize',20)
+
+    % total indexes of Twave peaks to keep
+    ikeep_src = cat(1,ikeep, ikeep2); %
+
+    ikeep_src_b1 = ikeep_src(ikeep_src<=160)';
+    ikeep_src_b2 = ikeep_src(ikeep_src>160)';
+
+    % tpeaks for first and second previous values
+    tpeaks1_b1 = tpeaks_tokeep(1, ikeep(ikeep<=160));  % first prev values 1 block
+    tpeaks1_b2 = tpeaks_tokeep(1, ikeep(ikeep>160));  % first prev values 2 block
+    tpeaks2_b1 = tpeaks_tokeep(2, ikeep2(ikeep2<=160));    % second prev values 320 1 block
+    tpeaks2_b2 = tpeaks_tokeep(2, ikeep2(ikeep2>160));    % second prev values 320 2 block
+
+    tpeaks_final_b1 = [tpeaks1_b1, tpeaks2_b1]; %
+    tpeaks_final_b2 = [tpeaks1_b2, tpeaks2_b2];
+
+
+    alignment_b1 = cat(1, tpeaks_final_b1, ikeep_src_b1); % saving the alignment of tpeaks and stimuli for later
+    alignment_b2 = cat(1, tpeaks_final_b2, ikeep_src_b2);
+
+    save('tpeaks_final_b1.mat', 'tpeaks_final_b1')
+    save('tpeaks_final_b2.mat', "tpeaks_final_b2")
+
+    save('alignment_b1.mat', "alignment_b1");
+    save('alignment_b2.mat', "alignment_b2");
+
+    close all
+end
+
+function [nearest_prev] = find_nearest_previous_values(vec1, vec2)
+
+% This function helps find the nearest previous T-peaks for stimuli
+sorted_vec2 = sort(vec2);
+len_vec1 = length(vec1);
+
+nearest_prev1 = NaN(1, len_vec1);
+nearest_prev2 = NaN(1, len_vec1);
+
+for i = 1:len_vec1
+    value1 = vec1(i); % event stimulus ms
+
+    idx_all = find(sorted_vec2 < value1); % which tpeaks go before stimulus event
+
+    if ~isempty(idx_all)
+        nearest_prev1(i) = sorted_vec2(idx_all(end)); % first previous value before stimulus
+
+        if length(idx_all) > 1
+            nearest_prev2(i) = sorted_vec2(idx_all(end-1)); % second previous value before stimulus
+        end
+    end
+end
+
+nearest_prev = cat(1, nearest_prev1, nearest_prev2);
+end
+
+
