@@ -10,13 +10,13 @@ nTime  = 226;
 group_data = zeros(nSubj, nLabel, nTime);
 
 
-for s = all_subj
+for s = 14
     
     fpathsave = ['D:/MEG_Data_PhD/zhanx_', num2str(s), '/HER/'];
     fpath = ['D:/MEG_Data_PhD/zhanx_', num2str(s), '/'];
     cd(fpathsave)
     subj = sprintf('zhanx_%d',s);
-    filetag = [fpathsave,subj,'_dataHER_rest2.mat'];
+    filetag = [fpathsave,subj,'_dataHER_tpeaks.mat'];
     load(filetag) %, 'dataHER_tpeaks', 'time_HER_ms'  % переменная data: 26×456×501
 
     mean_epochs = squeeze(mean(dataHER_rest,2));   % 26 × 501

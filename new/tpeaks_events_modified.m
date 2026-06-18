@@ -12,7 +12,7 @@ addpath('E:\MEG_Data_PhD\');
 addpath('C:\Users\MSI\Documents\MATLAB\fieldtrip-20240603/')
 ft_defaults
 
-for n = all
+for n = 14
     %@Test in this one
     subjname = ['zhanx_', num2str(n)];
 
@@ -99,7 +99,7 @@ for n = all
 
     stimuli_times_block_2 = all_events(1,is2);
 
-    iti2_duration_ms = diff(stimuli_times_block_2); 
+    iti2_duration_ms = diff(stimuli_times_block_2); % Marina changed
 
     % Binary feedback on reward acquisition was visible for 1900 [ ± 100] ms,
     figure; histogram(iti2_duration_ms,20); set(gca,'FontSize',20)
@@ -188,7 +188,7 @@ for n = all
 
     % we append a large first value so the subsequent check always succeeds
     % for the first t-peak pair
-    iti_duration_ms = cat(2, 10000, iti_duration_ms);
+    iti_duration_ms = cat(2, 10000, iti_duration_ms);      % Marina changed
     iti2_duration_ms = cat(2, 10000, iti2_duration_ms);
 
     %@ total iti_duration_ms list

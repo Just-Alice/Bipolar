@@ -10,7 +10,7 @@ for i = 1:nTrials
     ylabel('Amplitude');
 
     % drawnow;
-    cd /Users/marinaivanova/Documents/Our_project/Heart/Cleaning/fake/zhanx_10/lh/
+    cd C:\Users\MSI\Documents\Our_project\Heart\Cleaning\new_tpeaks\zhanx_54/lh/
     fname = [num2str(i), '.png'];
     saveas(gcf, fname, 'png');
     close all

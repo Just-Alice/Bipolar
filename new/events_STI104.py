@@ -29,13 +29,14 @@ from scipy.io import savemat
 all = [2, 4, 6, 8, 10, 12, 14, 16, 17, 18, 19, 20, 22, 23, 24, 27, 28, 29, 31, 32, 35, 36, 38, 40, 42, 44, 45, 46, 47, 51, 52, 53, 54, 55, 56, 57, 58, 59, 61, 63, 64, 65, 67, 68, 69, 70]
 # bipolar = [17 18 19 20 27 35 36 40 42 44 46 51 52 56 57 59 64 69 70];
 
-test = ['10', '17'] 
+rest = [46, 47, 51, 52, 53, 54, 55, 56, 57, 58, 59, 61, 63, 64, 65, 67, 68, 69, 70]
+test = [14]
 
-for n in all:  # choose 'all' for final run
+for n in test: # in all:  # choose 'all' for final run
     subj = op.join('zhanx_' + str(n))
     blocks = ['_b1', '_b2']
     for block in blocks:
-        fpath = op.join('/Volumes/KINGSTON/MEG_Data_PhD/' + subj + '/')   
+        fpath = op.join('E:/MEG_Data_PhD/' + subj + '/')   
 
         mat_file = op.join(fpath + 'tpeaks_final' + block + '.mat')
         meg_file = op.join(fpath + subj + block + '_preprocessed.fif')       
@@ -67,8 +68,15 @@ for n in all:  # choose 'all' for final run
         except IndexError:
             valid_mask = (event_samples >= 0) & (event_samples < raw.n_times) 
             event_samples = event_samples[valid_mask]
-            align = align[valid_mask]
-            stim_data[0, event_samples] = 1
+           # align = align.transpose()
+           
+            if n == 24 or n == 28:
+                align = align.T[valid_mask]
+                align = align.T
+            else:
+                align = align[valid_mask]
+                
+        stim_data[0, event_samples] = 1
             
         stim_info = mne.create_info(['STI104'], sfreq, ['stim'])
         stim_raw = mne.io.RawArray(stim_data, stim_info)

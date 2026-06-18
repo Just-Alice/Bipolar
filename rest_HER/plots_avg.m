@@ -6,7 +6,7 @@ cd 'C:\Users\MSI\Documents\Our_project\Heart\all_HER\'
 load dataHERnorm_bipolar_avg.mat
 load dataHERnorm_healthy_avg.mat
 
-fpath = ['D:/MEG_Data_PhD/zhanx_10/HER/'];
+fpath = ['E:\MEG_Data_PhD\zhanx_10\HER/'];
 
 save2path = ['C:\Users\MSI/Documents/Our_project/Heart/all_HER/timeanalysis/'];
 
@@ -141,4 +141,8 @@ for n = 1:2:26
 
     xlabel('Time');
     ylabel('Amplitude (SD)');
+    
+    saveas(gcf, fullfile(save2path, ...
+       sprintf('HER_healthy_vs_bipolar_LCMV_%d_%d.png', ...
+       idx(1), idx(2))));
 end

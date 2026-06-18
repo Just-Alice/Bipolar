@@ -21,9 +21,9 @@ anat_labels = {'caudalanteriorcingulate-lh'; 'caudalanteriorcingulate-rh'; 'caud
 
 %% Do baseline correction (Data - MeanBas) / StdBas
 
-dataHERnorm_bipolar = {}; % without 10 31 54 55 67
+dataHERnorm_healthy = {}; % without 10 31 54 55 67
 
-for ss = 14
+for ss = indsubj_2
 
     fpathsave = ['E:/MEG_Data_PhD/zhanx_', num2str(ss), '/HER/'];
     cd(fpathsave)
@@ -89,15 +89,15 @@ for ss = 14
     % 
     % time2plot = time(xp1 : xp2)
 
-    dataHERnorm_bipolar{ss} = dataHERnorm; % cell structure, 26 labels x trials x samples
+    dataHERnorm_healthy{ss} = dataHERnorm; % cell structure, 26 labels x trials x samples
   
 end
 % save dataHERnorm_allsubj to later do group stats
 
-% close all
-% cd(save2path)
-% 
-% filetag_1 = ['dataHERnorm_bipolar_avg.mat'];
-% save(filetag_1, 'dataHERnorm_bipolar')
+close all
+cd(save2path)
+
+filetag_1 = ['dataHERnorm_healthy_avg.mat'];
+save(filetag_1, 'dataHERnorm_healthy')
 
 
