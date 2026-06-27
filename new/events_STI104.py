@@ -32,7 +32,7 @@ all = [2, 4, 6, 8, 10, 12, 14, 16, 17, 18, 19, 20, 22, 23, 24, 27, 28, 29, 31, 3
 rest = [46, 47, 51, 52, 53, 54, 55, 56, 57, 58, 59, 61, 63, 64, 65, 67, 68, 69, 70]
 test = [14]
 
-for n in test: # in all:  # choose 'all' for final run
+for n in all: # in all:  # choose 'all' for final run
     subj = op.join('zhanx_' + str(n))
     blocks = ['_b1', '_b2']
     for block in blocks:
